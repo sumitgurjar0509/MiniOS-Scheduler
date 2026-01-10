@@ -37,5 +37,5 @@ private:
     void run_fcfs();
     void run_sjf();
     void run_priority();
-    void run_rr();
+    void run_rr(int quantum = 2);
 };

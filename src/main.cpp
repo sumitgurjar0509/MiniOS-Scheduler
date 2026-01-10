@@ -10,7 +10,7 @@ int main() {
         {"P3", 4, 1, 1, 3}
     };
 
-    Scheduler s1(processes, SJF);
+    Scheduler s1(processes, PRIORITY);
     s1.run();
     s1.print_results();
 

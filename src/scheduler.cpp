@@ -84,113 +84,128 @@ void Scheduler::run_sjf() { // Preemptive (Shortest Remaining Time First)
 }
 
 
-void Scheduler::run_priority() {
+void Scheduler::run_priority() {  // Non-preemptive priority
     int time = 0;
     int completed = 0;
     int n = processes.size();
 
     std::vector<bool> done(n, false);
 
-    // We assume: lower priority number = higher actual priority
-
     while (completed < n) {
         int idx = -1;
-        int best_priority = 1e9;
+        int best_pri = 1e9;  // large number
 
-        // Pick process with highest priority (smallest number)
+        // Pick available process with highest priority
         for (int i = 0; i < n; i++) {
             if (!done[i] && processes[i].arrival_time <= time) {
-                if (processes[i].priority < best_priority) {
-                    best_priority = processes[i].priority;
+                if (processes[i].priority < best_pri) {
+                    best_pri = processes[i].priority;
                     idx = i;
                 }
             }
         }
 
-        // No process ready yet -> idle CPU
+        // If nothing ready, CPU idle
         if (idx == -1) {
+            gantt.push_back("IDLE");
             time++;
             continue;
         }
 
-        // First time scheduling
+        // First run
         if (processes[idx].start_time == -1)
             processes[idx].start_time = time;
 
-        for (int i = 0; i < processes[idx].burst_time; i++)
-            gantt.push_back(processes[idx].pid), time++;
+        // Execute full burst
+        for (int b = 0; b < processes[idx].burst_time; b++) {
+            gantt.push_back(processes[idx].pid);
+            time++;
+        }
 
         processes[idx].completion_time = time;
-
         done[idx] = true;
         completed++;
     }
 }
 
-
-void Scheduler::run_rr() {
+void Scheduler::run_rr(int quantum) {
     int time = 0;
-    int completed = 0;
     int n = processes.size();
+    int completed = 0;
 
-    // Initialize remaining time if not already
+    // Create a queue of runnable processes
+    std::queue<int> q;
+
+    // Track remaining time
     for (auto &p : processes)
         p.remaining_time = p.burst_time;
 
-    std::vector<bool> added(n, false);
-    std::queue<int> q;
+    // To track who is in queue
+    std::vector<bool> in_queue(n, false);
 
-    // Sort by arrival
-    std::sort(processes.begin(), processes.end(),
-              [](auto &a, auto &b){ return a.arrival_time < b.arrival_time; });
-
-    // Push first available process
-    q.push(0);
-    added[0] = true;
+    // Add any process arriving at time 0
+    for (int i = 0; i < n; i++) {
+        if (processes[i].arrival_time == 0) {
+            q.push(i);
+            in_queue[i] = true;
+        }
+    }
 
     while (completed < n) {
+        // No process ready → CPU idle
         if (q.empty()) {
+            gantt.push_back("IDLE");
             time++;
-            for (int i = 0; i < n; i++)
-                if (!added[i] && processes[i].arrival_time <= time)
-                    q.push(i), added[i] = true;
+
+            // Check if new processes arrived
+            for (int i = 0; i < n; i++) {
+                if (!in_queue[i] && processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
+                    q.push(i);
+                    in_queue[i] = true;
+                }
+            }
             continue;
         }
 
         int idx = q.front();
         q.pop();
 
-        Process &p = processes[idx];
+        // First run timestamp
+        if (processes[idx].start_time == -1)
+            processes[idx].start_time = time;
 
-        if (p.start_time == -1)
-            p.start_time = time;
+        int exec = std::min(quantum, processes[idx].remaining_time);
 
-        int exec = std::min(quantum, p.remaining_time);
-        for (int i = 0; i < exec; i++)
-            gantt.push_back(processes[idx].pid), time++;
+        // Execute for 'exec' time units
+        for (int t = 0; t < exec; t++) {
+            gantt.push_back(processes[idx].pid);
+            time++;
+        }
+
         processes[idx].remaining_time -= exec;
 
-
-        // Add newly arrived processes during execution
+        // Check arrival of new processes DURING execution
         for (int i = 0; i < n; i++) {
-            if (!added[i] && processes[i].arrival_time <= time) {
+            if (!in_queue[i] && processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
                 q.push(i);
-                added[i] = true;
+                in_queue[i] = true;
             }
         }
 
-        if (p.remaining_time > 0) {
-            q.push(idx); // back of queue
-        } else {
-            p.completion_time = time;
+        // Finished?
+        if (processes[idx].remaining_time == 0) {
+            processes[idx].completion_time = time;
             completed++;
+        } else {
+            // Not finished → back to queue
+            q.push(idx);
         }
     }
 }
 
-
 void Scheduler::print_results() {
     print_table(processes);
     print_gantt(gantt);
+    export_gantt_csv(gantt);
 }
 
