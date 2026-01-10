@@ -1,4 +1,4 @@
-🧠 MiniOS-Scheduler
+#🧠 MiniOS-Scheduler
 
 A lightweight CPU scheduling simulator written in C++ that demonstrates how modern operating systems manage processes across different scheduling strategies.
 
@@ -11,8 +11,8 @@ Priority	❌	✔️
 Round Robin	✔️	❌
 MLFQ (Multi-Level Feedback Queue)	✔️	✔️
 ```
-🚀 Features
-✔ Multiple Scheduling Algorithms
+#🚀 Features
+##✔ Multiple Scheduling Algorithms
 
 Simulate and compare:
 
@@ -39,7 +39,7 @@ Optional I/O blocking simulation
 
 Periodic priority boosting
 
-✔ Gantt Chart Output
+#✔ Gantt Chart Output
 
 Console display:
 ```
@@ -54,7 +54,7 @@ time,process
 2,P2
 ...
 ```
-✔ Process Statistics
+#✔ Process Statistics
 
 For every process:
 
@@ -68,7 +68,7 @@ Turnaround Time
 
 With averages printed automatically.
 
-📁 Project Structure
+#📁 Project Structure
 ```makefile
 MiniOS-Scheduler/
 │
@@ -83,7 +83,7 @@ MiniOS-Scheduler/
 │
 └── build/               # Generated build folder
 ```
-🧪 Input Format (Inside main.cpp)
+#🧪 Input Format (Inside main.cpp)
 
 Processes are defined as:
 ```cpp
@@ -98,21 +98,21 @@ Each process has:
 ```
 PID, Arrival Time, Burst Time, Priority (lower = higher priority)
 ```
-🏗 Build & Run
-📌 Requirements
+#🏗 Build & Run
+##📌 Requirements
 
 CMake 3.10+
 
 C++17 compiler (GCC, Clang, MSVC or MinGW)
 
-🔧 Build
+##🔧 Build
 ```bash
 mkdir build
 cd build
 cmake ..
 cmake --build .
 ```
-▶️ Run
+##▶️ Run
 
 Linux/macOS:
 ```bash
@@ -123,7 +123,7 @@ Windows:
 ```bash
 .\scheduler.exe
 ```
-🛠 How to Switch Algorithms
+#🛠 How to Switch Algorithms
 
 Open main.cpp and change:
 ```cpp
@@ -138,7 +138,7 @@ PRIORITY
 ROUND_ROBIN
 MLFQ
 ```
-📈 Sample Output
+#📈 Sample Output
 ```markdown
 PID  AT  BT  ST  CT  WT  TAT
 --------------------------------------
@@ -152,7 +152,7 @@ Avg TAT: 5.33333
 ===== GANTT CHART =====
 | P1 | P1 | P2 | P2 | P3 |
 ```
-🎯 Learning Outcomes
+#🎯 Learning Outcomes
 
 By building this project, you learn:
 
@@ -168,7 +168,7 @@ C++ queues, structs, loops, and system simulation logic
 
 Reading performance metrics like Waiting/TAT
 
-🧩 Future Extensions
+#🧩 Future Extensions
 
 Pull requests welcome!
 Ideas:
@@ -185,8 +185,8 @@ GUI visualization (Qt or ImGui)
 
 Streamlit web dashboard (Python + CSV)
 
-⭐ Author
+#⭐ Author
 
-👨‍💻 Sumit Gurjar
+##👨‍💻 Sumit Gurjar
 
 If you find this useful, ⭐ star the repo and share!
