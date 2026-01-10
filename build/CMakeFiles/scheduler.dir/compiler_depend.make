@@ -302,12 +302,17 @@ CMakeFiles/scheduler.dir/src/scheduler.cpp.obj: C:/Users/HP/MiniOS-Scheduler/src
   C:/mingw64/include/c++/13.1.0/bits/stl_tempbuf.h \
   C:/mingw64/include/c++/13.1.0/pstl/glue_algorithm_defs.h \
   C:/mingw64/include/c++/13.1.0/pstl/execution_defs.h \
-  C:/Users/HP/MiniOS-Scheduler/include/scheduler.h \
-  C:/mingw64/include/c++/13.1.0/vector \
+  C:/mingw64/include/c++/13.1.0/queue \
+  C:/mingw64/include/c++/13.1.0/deque \
   C:/mingw64/include/c++/13.1.0/bits/stl_uninitialized.h \
+  C:/mingw64/include/c++/13.1.0/bits/stl_deque.h \
+  C:/mingw64/include/c++/13.1.0/bits/deque.tcc \
+  C:/mingw64/include/c++/13.1.0/vector \
   C:/mingw64/include/c++/13.1.0/bits/stl_vector.h \
   C:/mingw64/include/c++/13.1.0/bits/stl_bvector.h \
   C:/mingw64/include/c++/13.1.0/bits/vector.tcc \
+  C:/mingw64/include/c++/13.1.0/bits/stl_queue.h \
+  C:/Users/HP/MiniOS-Scheduler/include/scheduler.h \
   C:/Users/HP/MiniOS-Scheduler/include/utils.h
 
 CMakeFiles/scheduler.dir/src/utils.cpp.obj: C:/Users/HP/MiniOS-Scheduler/src/utils.cpp \
@@ -474,8 +479,6 @@ CMakeFiles/scheduler.dir/src/utils.cpp.obj: C:/Users/HP/MiniOS-Scheduler/src/uti
   C:/Users/HP/MiniOS-Scheduler/include/scheduler.h
 
 
-C:/mingw64/include/c++/13.1.0/bits/sstream.tcc:
-
 C:/mingw64/include/c++/13.1.0/bits/quoted_string.h:
 
 C:/mingw64/include/c++/13.1.0/bits/locale_facets_nonio.tcc:
@@ -485,6 +488,12 @@ C:/mingw64/include/c++/13.1.0/ctime:
 C:/mingw64/include/c++/13.1.0/iomanip:
 
 C:/Users/HP/MiniOS-Scheduler/src/utils.cpp:
+
+C:/mingw64/include/c++/13.1.0/bits/sstream.tcc:
+
+C:/mingw64/include/c++/13.1.0/bits/stl_queue.h:
+
+C:/mingw64/include/c++/13.1.0/bits/deque.tcc:
 
 C:/mingw64/include/c++/13.1.0/pstl/execution_defs.h:
 
@@ -568,6 +577,8 @@ C:/mingw64/include/c++/13.1.0/bits/concept_check.h:
 
 C:/Users/HP/MiniOS-Scheduler/include/utils.h:
 
+C:/mingw64/include/c++/13.1.0/queue:
+
 C:/mingw64/include/c++/13.1.0/bits/basic_ios.tcc:
 
 C:/mingw64/include/c++/13.1.0/bits/localefwd.h:
@@ -603,6 +614,8 @@ C:/mingw64/include/c++/13.1.0/typeinfo:
 C:/mingw64/include/c++/13.1.0/bit:
 
 C:/mingw64/include/c++/13.1.0/bits/locale_conv.h:
+
+C:/mingw64/include/c++/13.1.0/deque:
 
 C:/mingw64/include/c++/13.1.0/ios:
 
@@ -757,6 +770,8 @@ C:/mingw64/include/c++/13.1.0/bits/cpp_type_traits.h:
 C:/mingw64/include/c++/13.1.0/bits/ostream_insert.h:
 
 C:/mingw64/include/c++/13.1.0/bits/cxxabi_forced.h:
+
+C:/mingw64/include/c++/13.1.0/bits/stl_deque.h:
 
 C:/mingw64/include/c++/13.1.0/bits/stl_iterator_base_funcs.h:
 

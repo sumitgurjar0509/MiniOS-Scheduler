@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <queue>
 #include "../include/scheduler.h"
 #include "../include/utils.h"
 
@@ -18,48 +19,67 @@ void Scheduler::run() {
 void Scheduler::run_fcfs() {
     int time = 0;
     for (auto &p : processes) {
-        if (time < p.arrival_time) time = p.arrival_time;
+        if (time < p.arrival_time) {
+            // CPU idle
+            while (time < p.arrival_time) {
+                gantt.push_back("IDLE");
+                time++;
+            }
+        }
         p.start_time = time;
-        time += p.burst_time;
+        for (int i = 0; i < p.burst_time; i++)
+            gantt.push_back(p.pid), time++;
         p.completion_time = time;
     }
 }
 
-void Scheduler::run_sjf() {
+
+void Scheduler::run_sjf() { // Preemptive (Shortest Remaining Time First)
     int time = 0;
     int completed = 0;
     int n = processes.size();
 
-    std::vector<bool> done(n, false);
+    // Initialize remaining_time if not set
+    for (auto &p : processes)
+        p.remaining_time = p.burst_time;
 
     while (completed < n) {
         int idx = -1;
-        int min_bt = 1e9;
+        int min_rt = 1e9;
 
-        // Pick shortest available job
+        // Find job with shortest remaining time at current time
         for (int i = 0; i < n; i++) {
-            if (!done[i] && processes[i].arrival_time <= time) {
-                if (processes[i].burst_time < min_bt) {
-                    min_bt = processes[i].burst_time;
+            if (processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
+                if (processes[i].remaining_time < min_rt) {
+                    min_rt = processes[i].remaining_time;
                     idx = i;
                 }
             }
         }
 
-        // If no process arrived yet
+        // CPU idle
         if (idx == -1) {
+            gantt.push_back("IDLE");
             time++;
             continue;
         }
 
-        // Execute selected process fully
+        // If first time running
         if (processes[idx].start_time == -1)
             processes[idx].start_time = time;
 
-        time += processes[idx].burst_time;
-        processes[idx].completion_time = time;
-        done[idx] = true;
-        completed++;
+        // Execute one unit
+        gantt.push_back(processes[idx].pid);
+        processes[idx].remaining_time--;
+        gantt.push_back(processes[idx].pid);
+        time++;
+
+
+        // Finished
+        if (processes[idx].remaining_time == 0) {
+            processes[idx].completion_time = time;
+            completed++;
+        }
     }
 }
 
@@ -97,7 +117,9 @@ void Scheduler::run_priority() {
         if (processes[idx].start_time == -1)
             processes[idx].start_time = time;
 
-        time += processes[idx].burst_time;
+        for (int i = 0; i < processes[idx].burst_time; i++)
+            gantt.push_back(processes[idx].pid), time++;
+
         processes[idx].completion_time = time;
 
         done[idx] = true;
@@ -144,8 +166,10 @@ void Scheduler::run_rr() {
             p.start_time = time;
 
         int exec = std::min(quantum, p.remaining_time);
-        p.remaining_time -= exec;
-        time += exec;
+        for (int i = 0; i < exec; i++)
+            gantt.push_back(processes[idx].pid), time++;
+        processes[idx].remaining_time -= exec;
+
 
         // Add newly arrived processes during execution
         for (int i = 0; i < n; i++) {
@@ -167,4 +191,6 @@ void Scheduler::run_rr() {
 
 void Scheduler::print_results() {
     print_table(processes);
+    print_gantt(gantt);
 }
+

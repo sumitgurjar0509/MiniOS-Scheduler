@@ -31,6 +31,8 @@ private:
     Algorithm algo;
     int quantum;
 
+    std::vector<std::string> gantt;
+
     // internal helpers
     void run_fcfs();
     void run_sjf();
