@@ -8,11 +8,26 @@ Scheduler::Scheduler(std::vector<Process> processes, Algorithm algo, int quantum
     : processes(processes), algo(algo), quantum(quantum) {}
 
 void Scheduler::run() {
+    for (auto &p : processes) {
+    p.start_time = -1;
+    p.remaining_time = p.burst_time;
+    p.completion_time = 0;
+    p.waiting_time = 0;
+    p.turnaround_time = 0;
+
+    p.priority = 0;
+    p.is_waiting_for_io = false;
+    p.io_remaining = 0;
+    p.current_queue = 0;
+    p.wait_counter = 0;
+
+}
     switch (algo) {
         case FCFS: run_fcfs(); break;
         case SJF: run_sjf(); break;
         case PRIORITY: run_priority(); break;
         case ROUND_ROBIN: run_rr(); break;
+        case MLFQ: run_mlfq(); break;
     }
 }
 
@@ -200,6 +215,149 @@ void Scheduler::run_rr(int quantum) {
             // Not finished → back to queue
             q.push(idx);
         }
+    }
+}
+
+void Scheduler::run_mlfq() {
+    int n = processes.size();
+    int time = 0;
+    int completed = 0;
+
+    std::queue<int> q1, q2, q3;
+    const int q1_quantum = 2;
+    const int q2_quantum = 4;
+    int boost_counter = 0;
+
+    // Reset fields for MLFQ
+    for (auto &p : processes) {
+        p.remaining_time = p.burst_time;
+        p.start_time = -1;
+        p.completion_time = 0;
+        p.waiting_time = 0;
+        p.turnaround_time = 0;
+
+        p.is_waiting_for_io = false;
+        p.io_remaining = 0;
+        p.current_queue = 1;
+        p.wait_counter = 0;
+    }
+
+    auto admit_arrivals = [&](int t) {
+        for (int i = 0; i < n; i++) {
+            auto &p = processes[i];
+            if (p.arrival_time <= t &&
+                p.remaining_time > 0 &&
+                !p.is_waiting_for_io) {
+
+                if (p.current_queue == 1)
+                    q1.push(i);
+                else if (p.current_queue == 2)
+                    q2.push(i);
+                else
+                    q3.push(i);
+            }
+        }
+    };
+
+    admit_arrivals(time);
+
+    while (completed < n) {
+
+        // === PRIORITY BOOST ===
+        boost_counter++;
+        if (boost_counter >= 20) {
+            boost_counter = 0;
+
+            while (!q2.empty()) { q1.push(q2.front()); q2.pop(); }
+            while (!q3.empty()) { q1.push(q3.front()); q3.pop(); }
+
+            for (auto &p : processes)
+                if (p.remaining_time > 0)
+                    p.current_queue = 1;
+        }
+
+        // === Pick next process ===
+        int idx = -1;
+        int level = -1;
+        if (!q1.empty()) idx = q1.front(), q1.pop(), level = 1;
+        else if (!q2.empty()) idx = q2.front(), q2.pop(), level = 2;
+        else if (!q3.empty()) idx = q3.front(), q3.pop(), level = 3;
+        else {
+            gantt.push_back("IDLE");
+            time++;
+            admit_arrivals(time);
+            continue;
+        }
+
+        Process &p = processes[idx];
+
+        if (p.start_time == -1)
+            p.start_time = time;
+
+        // === RANDOM I/O SIMULATION ===
+        if (!p.is_waiting_for_io && rand() % 20 == 0) {
+            p.is_waiting_for_io = true;
+            p.io_remaining = 3;
+        }
+
+        if (p.is_waiting_for_io) {
+            gantt.push_back("IDLE");
+            time++;
+            p.io_remaining--;
+
+            if (p.io_remaining == 0) {
+                p.is_waiting_for_io = false;
+                p.current_queue = 1;
+                q1.push(idx);
+            }
+            admit_arrivals(time);
+            continue;
+        }
+
+        // === Quantum ===
+        int exec = p.remaining_time;
+        if (level == 1) exec = std::min(q1_quantum, p.remaining_time);
+        else if (level == 2) exec = std::min(q2_quantum, p.remaining_time);
+
+        // === Execute ===
+        for (int t = 0; t < exec; t++) {
+            gantt.push_back(p.pid);
+            time++;
+            p.remaining_time--;
+
+            // Aging for others
+            for (int j = 0; j < n; j++) {
+                if (j != idx && processes[j].remaining_time > 0 && !processes[j].is_waiting_for_io) {
+                    processes[j].wait_counter++;
+                    if (processes[j].wait_counter > 5) {
+                        if (processes[j].current_queue > 1)
+                            processes[j].current_queue--;
+                        processes[j].wait_counter = 0;
+                    }
+                }
+            }
+
+            admit_arrivals(time);
+        }
+
+        // === Finished ===
+        if (p.remaining_time == 0) {
+            p.completion_time = time;
+            completed++;
+            continue;
+        }
+
+        // === Demote if not finished ===
+        p.current_queue = std::min(p.current_queue + 1, 3);
+        if (p.current_queue == 2) q2.push(idx);
+        else q3.push(idx);
+    }
+
+    // === Final Stats ===
+    for (auto &p : processes) {
+        p.turnaround_time = p.completion_time - p.arrival_time;
+        p.waiting_time = p.turnaround_time - p.burst_time;
+        if (p.waiting_time < 0) p.waiting_time = 0;
     }
 }
 
