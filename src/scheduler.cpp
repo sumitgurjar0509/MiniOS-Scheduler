@@ -297,5 +297,37 @@ void Scheduler::print_results() {
     print_table(processes);
     print_gantt(gantt);
     export_gantt_csv(gantt);
+
+    double total_wt = 0, total_tat = 0;
+    for (const auto& p : processes) {
+        total_wt += p.waiting_time;
+        total_tat += p.turnaround_time;
+    }
+
+    double avg_wt = total_wt / processes.size();
+    double avg_tat = total_tat / processes.size();
+
+    double cpu_util = (current_time > 0)
+        ? (double(cpu_busy_time) / current_time) * 100.0
+        : 0.0;
+
+    double throughput = (current_time > 0)
+        ? (double(processes.size()) / current_time)
+        : 0.0;
+
     print_system_metrics(current_time, cpu_busy_time, processes.size());
+
+    export_performance_report(
+        algo == ROUND_ROBIN_MULTICORE ? "rr-mc" :
+        algo == ROUND_ROBIN ? "rr" :
+        algo == FCFS ? "fcfs" :
+        algo == SJF ? "sjf" :
+        algo == PRIORITY ? "priority" : "mlfq",
+        num_cores,
+        avg_wt,
+        avg_tat,
+        cpu_util,
+        throughput
+    );
 }
+
