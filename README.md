@@ -1,192 +1,197 @@
-# 🧠 MiniOS-Scheduler
+# 🧠 MiniOS Scheduler
 
-A lightweight CPU scheduling simulator written in C++ that demonstrates how modern operating systems manage processes across different scheduling strategies.
+A C++ CPU Scheduling Simulator that models classical and modern operating system scheduling algorithms, supports multi-core execution, generates performance metrics, and enables experimental comparison using automated reports and visualizations.
 
-This project implements five classic scheduling algorithms with Gantt chart visualization:
-```
-Algorithm	Preemptive	Priority Aware
-FCFS	❌	❌
-SJF (SRTF)	✔️	❌
-Priority	❌	✔️
-Round Robin	✔️	❌
-MLFQ (Multi-Level Feedback Queue)	✔️	✔️
-```
 ## 🚀 Features
-### ✔ Multiple Scheduling Algorithms
 
-Simulate and compare:
+✅ Multiple scheduling algorithms:
 
-First Come First Serve (FCFS)
+FCFS (First Come First Serve)
 
-Shortest Job First (Preemptive SRTF)
+SJF (Preemptive – Shortest Remaining Time First)
 
-Non-Preemptive Priority
+Priority Scheduling
 
 Round Robin (RR)
 
-Multi Level Feedback Queue (MLFQ)
-With:
+Multi-Level Feedback Queue (MLFQ)
 
-3 Queues (Q1→Q2→Q3)
+Multi-Core Round Robin (RR-MC)
 
-Quantum: 2 → 4 → FCFS
+✅ Runtime configuration via command-line arguments
 
-Aging (prevents starvation)
+✅ File-based workload input
 
-Priority promotion/demotion
+✅ Multi-core CPU simulation
 
-Optional I/O blocking simulation
+✅ Gantt chart visualization (console + CSV)
 
-Periodic priority boosting
+✅ System-level metrics:
 
-## ✔ Gantt Chart Output
+Average Waiting Time
 
-Console display:
+Average Turnaround Time
+
+CPU Utilization
+
+Throughput
+
+✅ Automated performance comparison report
+
+✅ Python-based plotting for experiments
+
+## 🏗️ Project Structure
 ```
-| P1 | P1 | P2 | P2 | P3 |
-```
-
-Plus auto export to gantt_output.csv:
-```python-repl
-time,process
-0,P1
-1,P1
-2,P2
-...
-```
-## ✔ Process Statistics
-
-For every process:
-
-Start Time
-
-Completion Time
-
-Waiting Time
-
-Turnaround Time
-
-With averages printed automatically.
-
-## 📁 Project Structure
-```makefile
 MiniOS-Scheduler/
-│
 ├── include/
-│   ├── scheduler.h      # Scheduler class and enums
-│   └── utils.h          # Printing + CSV export helpers
-│
+│   ├── scheduler.h
+│   └── utils.h
 ├── src/
-│   ├── main.cpp         # Select scheduler & launch simulation
-│   ├── scheduler.cpp    # All scheduling algorithms
-│   └── utils.cpp        # Table print + Gantt + CSV export
-│
-└── build/               # Generated build folder
+│   ├── scheduler.cpp
+│   ├── utils.cpp
+│   └── main.cpp
+├── build/                # build artifacts (ignored by git)
+├── input.txt             # sample workload
+├── plot_results.py       # Python plotting script
+├── performance_report.csv
+├── CMakeLists.txt
+└── README.md
 ```
-## 🧪 Input Format (Inside main.cpp)
+## 🛠️ Build Instructions
+### Prerequisites
 
-Processes are defined as:
-```cpp
-{
-    {"P1", 0, 5, 1},
-    {"P2", 2, 3, 2},
-    {"P3", 4, 1, 3}
-}
+C++17 compiler (GCC / MinGW / MSVC)
+
+CMake ≥ 3.10
+
+Python 3 (for plotting)
+
+### Build
+```
+cmake -S . -B build
+cmake --build build
+```
+## ▶️ How to Run
+### General Format
+```
+scheduler.exe <algorithm> <input_file> [num_cores]
+```
+### Examples
+#### Single-core Round Robin
+```
+scheduler.exe rr input.txt
+```
+#### Multi-core Round Robin (2 cores)
+```
+scheduler.exe rr-mc input.txt 2
+```
+#### Default (MLFQ, single core)
+```
+scheduler.exe
+```
+### 📄 Input File Format
+
+#### input.txt
+```
+PID AT BT PRIORITY
+P1 0 5 2
+P2 2 3 1
+P3 4 1 3
 ```
 
-Each process has:
+Where:
+
+AT = Arrival Time
+
+BT = Burst Time
+
+## 📊 Performance Metrics
+
+For every run, the scheduler computes:
+
+Average Waiting Time
+
+Average Turnaround Time
+
+CPU Utilization
+
+Throughput
+
+All results are automatically appended to:
 ```
-PID, Arrival Time, Burst Time, Priority (lower = higher priority)
+performance_report.csv
 ```
-## 🏗 Build & Run
-### 📌 Requirements
+## 🧪 Experimental Evaluation
+### Methodology
 
-CMake 3.10+
+Same workload executed using different scheduling algorithms
 
-C++17 compiler (GCC, Clang, MSVC or MinGW)
+Metrics collected programmatically
 
-### 🔧 Build
-```bash
-mkdir build
-cd build
-cmake ..
-cmake --build .
+Results exported as CSV
+
+Visualization performed using Python
+
+### Example CSV Output
 ```
-### ▶️ Run
-
-Linux/macOS:
-```bash
-./scheduler
+algorithm,cores,avg_waiting_time,avg_turnaround_time,cpu_utilization,throughput
+fcfs,1,2.33,5.33,100.0,0.33
+rr,1,3.00,6.00,95.0,0.30
+rr-mc,2,1.50,4.20,180.0,0.66
 ```
 
-Windows:
-```bash
-.\scheduler.exe
-```
-## 🛠 How to Switch Algorithms
+⚠️ CPU utilization can exceed 100% in multi-core systems since it represents aggregate core usage.
 
-Open main.cpp and change:
-```cpp
-Scheduler scheduler(processes, MLFQ, 2);
+## 📈 Visualization (Python)
+
+Generate comparison plots:
+```
+python plot_results.py
 ```
 
-Available options:
-```cpp
-FCFS
-SJF
-PRIORITY
-ROUND_ROBIN
-MLFQ
-```
-## 📈 Sample Output
-```markdown
-PID  AT  BT  ST  CT  WT  TAT
---------------------------------------
-P1   0   5   0   5   0   5
-P2   2   3   5   9   4   7
-P3   4   1   8   9   4   5
---------------------------------------
-Avg WT : 2.33333
-Avg TAT: 5.33333
+Generated graphs:
 
-===== GANTT CHART =====
-| P1 | P1 | P2 | P2 | P3 |
-```
-## 🎯 Learning Outcomes
+Average Waiting Time
 
-By building this project, you learn:
+Average Turnaround Time
 
-How operating systems schedule processes
+CPU Utilization
 
-Difference between preemption & non-preemption
+Throughput
 
-What starvation is and how to prevent it
+Saved as .png files for reports or papers.
 
-How multi-level feedback queues work
+## 🎓 Learning Outcomes
 
-C++ queues, structs, loops, and system simulation logic
+This project demonstrates:
 
-Reading performance metrics like Waiting/TAT
+Practical understanding of OS scheduling policies
+
+Differences between preemptive and non-preemptive scheduling
+
+Effects of time quantum and core count
+
+Realistic multi-core scheduling behavior
+
+Experimental performance evaluation techniques
 
 ## 🧩 Future Extensions
 
-Pull requests welcome!
-Ideas:
+Multi-core MLFQ
 
-Multicore scheduling simulation
+Priority aging toggle
 
-CPU & I/O pipeline (process can block and resume)
+I/O blocking simulation
 
-Interactive CLI input
+Linux CFS-inspired scheduler
 
-Random process generator
+Web-based visualization dashboard
 
-GUI visualization (Qt or ImGui)
+## 👤 Author
 
-Streamlit web dashboard (Python + CSV)
+### Sumit Gurjar
+Operating Systems | C++ | Systems Programming
 
-## ⭐ Author
+## ⭐ If you find this useful
 
-### 👨‍💻 Sumit Gurjar
-
-If you find this useful, ⭐ star the repo and share!
+Give the repository a ⭐ — it helps a lot!
