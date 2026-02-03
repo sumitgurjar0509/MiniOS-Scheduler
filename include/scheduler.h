@@ -2,6 +2,14 @@
 #include <string>
 #include <vector>
 
+enum State {
+    NEW,
+    READY,
+    RUNNING,
+    WAITING,
+    TERMINATED
+};
+
 struct Process {
     std::string pid;
     int arrival_time;
@@ -15,14 +23,18 @@ struct Process {
     int turnaround_time;
 
     int priority;
-    bool is_waiting_for_io;   // <-- NEW
-    int io_remaining;         // <-- NEW for sleep duration
 
-    int current_queue;        // <-- Track which queue it belongs to
-    int wait_counter;         // <-- For aging
+    // I/O simulation
+    bool is_waiting_for_io;
+    int io_remaining;
+
+    // MLFQ / Aging
+    int current_queue;
+    int wait_counter;
+
+    // Process state
+    State state;
 };
-
-
 
 enum Algorithm {
     FCFS,
@@ -34,7 +46,10 @@ enum Algorithm {
 
 class Scheduler {
 public:
-    Scheduler(std::vector<Process> processes, Algorithm algo, int quantum = 2);
+    Scheduler(std::vector<Process> processes,
+              Algorithm algo,
+              int quantum = 2,
+              int contextSwitchTime = 0);
 
     void run();
     void print_results();
@@ -44,12 +59,21 @@ private:
     Algorithm algo;
     int quantum;
 
+    // Time & metrics
+    int current_time;
+    int cpu_busy_time;
+    int context_switch_time;
+
     std::vector<std::string> gantt;
 
     // internal helpers
     void run_fcfs();
     void run_sjf();
     void run_priority();
-    void run_rr(int quantum = 2);
+    void run_rr(int quantum);
     void run_mlfq();
+
+    // utilities
+    void update_waiting_times();
+    void handle_io();
 };
